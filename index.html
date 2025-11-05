@@ -4,227 +4,153 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Project Map</title>
+  <title>GNWC Projectenkaart</title>
+
+  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
   <style>
-    html,
-    body {
+    /* =============== Basis layout + huisstijl randen =============== */
+    html, body {
       height: 100%;
       margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      border-top: 5px solid #86bc25;   /* groen */
+      border-bottom: 10px solid #b3cbd9; /* blauwgrijs */
+      overflow: hidden; /* geen scrollbalken */
     }
+    #map { height: 100%; width: 100%; }
 
-    #map {
-      height: 100%;
-    }
-
-    .name-id-tooltip {
-      font-weight: 600;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, .15);
-      border: 1px solid rgba(0, 0, 0, .15);
-    }
-
-    .leaflet-tooltip {
-      background: #fff;
-      color: #222;
-      border: 1px solid rgba(0, 0, 0, .25);
-    }
-
-    /* Filter legend UI */
-    .legend {
-      background: #fff;
-      padding: 10px 12px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, .2);
-      max-height: 45vh;
-      overflow: auto;
-      font: 14px/1.3 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-    }
-
-    .legend h4 {
-      margin: 0 0 6px;
-      font-size: 14px;
-    }
-
-    .legend .group {
-      margin-bottom: 10px;
-    }
-
-    .legend .row {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin: 3px 0;
-    }
-
-    .legend .controls {
-      display: flex;
-      gap: 8px;
-      margin: 6px 0 8px;
-      flex-wrap: wrap;
-    }
-
-    .legend .controls button {
-      font-size: 12px;
-      padding: 2px 6px;
-      border: 1px solid #ddd;
-      background: #f6f6f6;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    .legend .controls button:hover {
-      background: #eee;
-    }
-
-    /* Leaflet layer control in jouw stijl */
-    .leaflet-control-layers {
-      background: #fff;
-      border: 2px solid #86bc25;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-      color: #436026;
-    }
-
-    .leaflet-control-layers-base label,
-    .leaflet-control-layers-overlays label {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 14px;
-      padding: 2px 6px;
-    }
-
-    .leaflet-control-layers input[type="radio"],
-    .leaflet-control-layers input[type="checkbox"] {
-      appearance: none;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      width: 16px;
-      height: 16px;
-      border: 2px solid #86bc25;
-      border-radius: 3px;
-      background: #fff;
-      cursor: pointer;
-      position: relative;
-      transition: .2s;
-    }
-
-    .leaflet-control-layers input[type="checkbox"]:checked,
-    .leaflet-control-layers input[type="radio"]:checked {
-      background: #86bc25;
-      border-color: #86bc25;
-    }
-
-    .leaflet-control-layers input[type="checkbox"]:checked::after,
-    .leaflet-control-layers input[type="radio"]:checked::after {
-      content: '';
-      position: absolute;
-      left: 4px;
-      top: 0px;
-      width: 4px;
-      height: 8px;
-      border: solid #fff;
-      border-width: 0 2px 2px 0;
-      transform: rotate(45deg);
-    }
-
-    .leaflet-control-layers label:hover {
-      background: rgba(134, 188, 37, 0.1);
-    }
-
-    .leaflet-control-layers-toggle {
-      background-color: #86bc25 !important;
-      background-image: none !important;
-      border-radius: 6px;
-      width: 28px;
-      height: 28px;
-    }
-
-    .leaflet-control-layers-toggle::after {
-      content: '≡';
-      color: #fff;
-      font-weight: bold;
-      position: relative;
-      top: 4px;
-      left: 8px;
-      font-size: 16px;
-    }
-
-    /* Custom groene checkbox-stijl in eigen legenda */
-    .legend input[type="checkbox"] {
-      appearance: none;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      width: 16px;
-      height: 16px;
-      border: 2px solid #86bc25;
-      border-radius: 3px;
-      display: inline-block;
-      position: relative;
-      cursor: pointer;
-      background-color: #fff;
-      vertical-align: middle;
-      transition: .2s;
-    }
-
-    .legend input[type="checkbox"]:checked {
-      background-color: #86bc25;
-      border-color: #86bc25;
-    }
-
-    .legend input[type="checkbox"]:checked::after {
-      content: '';
-      position: absolute;
-      left: 4px;
-      top: 0px;
-      width: 4px;
-      height: 8px;
-      border: solid #fff;
-      border-width: 0 2px 2px 0;
-      transform: rotate(45deg);
-    }
-
+    /* =============== Titelbadge (middenboven) =============== */
     .map-title {
       position: absolute;
-      top: 10px;
+      top: 0px;
       left: 50%;
       transform: translateX(-50%);
       background: #86bc25;
+      color: #436026;
       padding: 8px 20px;
       border-radius: 10px;
-      text-align: center;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-      color: #436026;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
       z-index: 1000;
+      box-shadow: 0 2px 6px rgba(0,0,0,.15);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      text-align: center;
     }
+    .map-title h1 { margin: 0; font-size: 25px; font-weight: 700; }
+    .map-title p { margin: 2px 0 0; font-size: 14px; color: #e7f2cf; }
 
-    .map-title h1 {
-      font-size: 25px;
-      font-weight: 700;
-      margin: 0;
+    /* =============== Tooltip / pin-label look =============== */
+    .name-id-tooltip {
+      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(0,0,0,.15);
+      border: 1px solid rgba(0,0,0,.15);
     }
-
-    .map-title p {
-      font-size: 14px;
-      margin: 2px 0 0;
-      color: #e7f2cf;
+    .leaflet-tooltip {
+      background: #fff;
+      color: #222;
+      border: 1px solid rgba(0,0,0,.25);
     }
-
-    /* Klikbare links in tooltip en popup */
-    .leaflet-tooltip a,
-    .leaflet-popup-content a {
+    .leaflet-tooltip a, .leaflet-popup-content a {
       color: #1a73e8;
       text-decoration: underline;
       font-weight: 500;
     }
-
-    .leaflet-tooltip a:hover,
-    .leaflet-popup-content a:hover {
+    .leaflet-tooltip a:hover, .leaflet-popup-content a:hover {
       color: #0b59c7;
       text-decoration: none;
+    }
+
+    /* =============== Rechter stapel: spacing + uniforme breedte =============== */
+    .leaflet-top.leaflet-right { margin-top: 8px; }
+    .leaflet-top.leaflet-right .leaflet-control { margin-bottom: 8px; }
+    .leaflet-top.leaflet-right .leaflet-control {
+      width: 240px; min-width: 240px; box-sizing: border-box; border-radius: 8px;
+      font: 14px/1.3 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      color: #436026;
+    }
+
+    /* =============== “Card”-look voor onze (filter)legenda =============== */
+    .legend {
+      background: #fff;
+      padding: 10px 12px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.2);
+      max-height: 45vh;
+      overflow: auto;
+    }
+    .legend h4 { margin: 0 0 6px; font-size: 14px; }
+    .legend .group { margin-bottom: 10px; }
+    .legend .row { display:flex; align-items:center; gap:6px; margin:3px 0; }
+    .legend .controls { display:flex; gap:8px; margin:6px 0 8px; flex-wrap:wrap; }
+    .legend .controls button {
+      font-size:12px; padding:2px 6px; border:1px solid #ddd; background:#f6f6f6;
+      border-radius:4px; cursor:pointer;
+    }
+    .legend .controls button:hover { background:#eee; }
+
+    /* =============== Mooie checkbox/radio-stijl =============== */
+    .legend input[type="checkbox"],
+    .leaflet-control-layers input[type="checkbox"],
+    .leaflet-control-layers input[type="radio"]{
+      appearance:none; -webkit-appearance:none; -moz-appearance:none;
+      width:16px; height:16px; border:2px solid #86bc25; border-radius:3px;
+      background:#fff; cursor:pointer; position:relative; transition:.2s;
+    }
+    .legend input[type="checkbox"]:checked,
+    .leaflet-control-layers input[type="checkbox"]:checked,
+    .leaflet-control-layers input[type="radio"]:checked{
+      background:#86bc25; border-color:#86bc25;
+    }
+    .legend input[type="checkbox"]:checked::after,
+    .leaflet-control-layers input[type="checkbox"]:checked::after,
+    .leaflet-control-layers input[type="radio"]:checked::after{
+      content:''; position:absolute; left:4px; top:0px; width:4px; height:8px;
+      border:solid #fff; border-width:0 2px 2px 0; transform:rotate(45deg);
+    }
+
+    /* =============== Leaflet layer control (stijl) =============== */
+    .leaflet-control-layers {
+      background:#fff; border:2px solid #86bc25; border-radius:8px;
+      box-shadow:0 2px 6px rgba(0,0,0,.15);
+    }
+    .leaflet-control-layers-base label,
+    .leaflet-control-layers-overlays label {
+      display:flex; align-items:center; gap:6px; font-size:14px; padding:2px 6px;
+    }
+    .leaflet-control-layers label:hover { background:rgba(134,188,37,.1); }
+
+    /* =============== Layer control collapsed / hamburger =============== */
+    .leaflet-control-layers.collapsed{
+      background:transparent!important; border:0!important; box-shadow:none!important; padding:0!important;
+    }
+    .leaflet-control-layers.collapsed .leaflet-control-layers-toggle{
+      display:block; width:36px; height:36px; border-radius:8px;
+      background-color:#86bc25!important; background-image:none!important; border:0!important;
+      box-shadow:0 2px 6px rgba(0,0,0,.15); position:relative;
+    }
+    .leaflet-control-layers.collapsed .leaflet-control-layers-toggle::after{
+      content:'≡'; position:absolute; top:50%; transform:translateY(-50%); left:8px;
+      color:#fff; font-weight:700; font-size:18px; line-height:1; margin:0;
+    }
+    .leaflet-bar .leaflet-control-layers-toggle,
+    .leaflet-bar .leaflet-control-layers-toggle:hover { border:none!important; }
+
+    /* =============== Collapsible panel-stijl (voor legenda & filters) =============== */
+    .legend details.panel { padding: 0; }
+    .legend details.panel > summary {
+      list-style: none; cursor: pointer; padding: 8px 10px; font-weight: 600;
+      color: #436026; background: #f6fbef; border-radius: 6px 6px 0 0;
+    }
+    .legend details.panel[open] > summary { border-bottom: 1px solid #e3efcf; }
+    .legend .panel-body { padding: 8px 10px 10px; }
+
+    /* =============== Responsive: controls onderaan op mobiel =============== */
+    @media (max-width: 768px){
+      .leaflet-top.leaflet-right{ top:auto; bottom:8px; right:0; left:auto; }
+      .leaflet-top.leaflet-right .leaflet-control{ width:92vw; max-width:360px; margin-right:8px; }
+      .leaflet-control-layers{ width:100%; }
     }
   </style>
 </head>
@@ -237,6 +163,7 @@
 
   <div id="map"></div>
 
+  <!-- Leaflet & Turf -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6.5.0/turf.min.js"></script>
@@ -287,18 +214,21 @@
     // Dikke gestreepte (stippel) outline, geen vulling, speciaal voor Wijkaanpak
     function styleWijkaanpak(feature) {
       return {
-        pane: 'wijkaanpak',   // blijft in het lagere pane
-        color: '#436026',     // outline-kleur (huisstijl)
-        weight: 4,            // dikke rand
-        dashArray: '8 6',     // streep:spatie
-        fill: false,          // geen vulling
+        pane: 'wijkaanpak',
+        color: '#436026',
+        weight: 4,
+        dashArray: '8 6',
+        fill: false,
         fillOpacity: 0,
         opacity: 1
       };
     }
 
     function setHoverStyle(layer, isHover) {
-      layer.setStyle({ weight: isHover ? 2 : 1, fillOpacity: isHover ? 0.55 : 0.35 });
+      const baseWeight = layer.options.weight ?? 1;
+      const newStyle = { weight: isHover ? baseWeight + 1 : baseWeight };
+      if (layer.options.fill !== false) newStyle.fillOpacity = isHover ? 0.55 : 0.35;
+      layer.setStyle(newStyle);
     }
 
     // Tooltip/Popup HTML
@@ -310,12 +240,14 @@
       HOVER_FIELDS.forEach(f => {
         if (f in props && props[f] != null) {
           let value = props[f];
-          if (f.toLowerCase() === 'website') {
-            const url = String(value).trim();
-            const fullUrl = url.startsWith('http') ? url : `https://${url}`;
-            value = `<a href="${fullUrl}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+          if (typeof value === 'string') value = value.trim();
+          if (String(f).toLowerCase() === 'website' && value) {
+            const url = String(value);
+            const fullUrl = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+            const label = fullUrl.replace(/^https?:\/\//i, '').replace(/\/$/, '');
+            value = `<a href="${fullUrl}" target="_blank" rel="noopener noreferrer">${label}</a>`;
           }
-          lines.push(`<b>${f}:</b> ${value}`);
+          if (value !== '' && value != null) lines.push(`<b>${f}:</b> ${value}`);
         }
       });
       return lines.join('<br>');
@@ -350,75 +282,21 @@
       });
     }
 
-    // Zoom-gestuurde markerlabels
+    // Zoom-gestuurde markerlabels (alleen voor zichtbare pins)
     function updateMarkerLabels() {
       const show = map.getZoom() >= LABEL_ZOOM;
       featureEntries.forEach(({ marker }) => {
+        if (!map.hasLayer(marker)) return;
         if (show) marker.openTooltip(); else marker.closeTooltip();
       });
     }
 
-    // Legenda (checkbox UI)
-    function buildLegendControl() {
-      const legend = L.control({ position: 'bottomright' });
-      legend.onAdd = function () {
-        const div = L.DomUtil.create('div', 'legend');
-
-        function onCheckboxChange(e) {
-          const field = e.target.dataset.field;
-          const val = e.target.dataset.value;
-          if (e.target.checked) selected[field].add(val);
-          else selected[field].delete(val);
-          updateVisibility();
-        }
-
-        function makeSection(fieldLabel, fieldKey) {
-          const wrapper = document.createElement('div'); wrapper.className = 'group';
-          const title = document.createElement('h4'); title.textContent = fieldLabel; wrapper.appendChild(title);
-
-          const controls = document.createElement('div'); controls.className = 'controls';
-          const btnAll = document.createElement('button'); btnAll.type = 'button'; btnAll.textContent = 'Alles';
-          const btnNone = document.createElement('button'); btnNone.type = 'button'; btnNone.textContent = 'Geen';
-          controls.appendChild(btnAll); controls.appendChild(btnNone); wrapper.appendChild(controls);
-
-          const values = Array.from(unique[fieldKey]).filter(v => v !== undefined && v !== null);
-          values.sort((a, b) => String(a).localeCompare(String(b), 'nl', { numeric: true }));
-
-          values.forEach(v => {
-            const row = document.createElement('label'); row.className = 'row';
-            const cb = document.createElement('input'); cb.type = 'checkbox';
-            cb.checked = selected[fieldKey].has(v);
-            cb.dataset.field = fieldKey; cb.dataset.value = v;
-            cb.addEventListener('change', onCheckboxChange);
-            const span = document.createElement('span'); span.textContent = v;
-            row.appendChild(cb); row.appendChild(span); wrapper.appendChild(row);
-          });
-
-          btnAll.onclick = () => {
-            values.forEach(v => selected[fieldKey].add(v));
-            wrapper.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
-            updateVisibility();
-          };
-          btnNone.onclick = () => {
-            selected[fieldKey].clear();
-            wrapper.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-            updateVisibility();
-          };
-
-          return wrapper;
-        }
-
-        div.appendChild(makeSection('Projecttype', 'Projecttype'));
-        div.appendChild(makeSection('Projectleider', 'Projectleider'));
-        div.appendChild(makeSection('Projectstatus', 'Projectstatus'));
-        return div;
-      };
-      legend.addTo(map);
-    }
-
     // ====== DATA LADEN ======
-    fetch(GEOJSON_URL)
-      .then(r => r.json())
+    fetch(GEOJSON_URL, { cache: 'no-store' })
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
       .then(data => {
         // 1) Wijkaanpak (onder)
         const gjWijkaanpak = L.geoJSON(data, {
@@ -448,10 +326,8 @@
             try { const c = turf.centroid(feature).geometry.coordinates; latlng = [c[1], c[0]]; }
             catch (e) { latlng = layer.getBounds().getCenter(); }
 
-            const name = props?.[NAME_FIELD] ?? '—';
             const id = props?.[ID_FIELD] ?? '—';
             const fidValue = props?.[NAME_FIELD] ?? '';
-
             const greenIcon = L.divIcon({
               className: "custom-pin",
               html: `
@@ -465,7 +341,7 @@
             });
             const marker = L.marker(latlng, { icon: greenIcon });
             marker.bindTooltip(`${id}`, { permanent: false, direction: 'auto', className: 'name-id-tooltip', offset: [0, 0] });
-            marker.bindPopup(`<div>${buildHoverHTML(props)}</div>`);
+            marker.bindPopup(`<div>${hoverHtml}</div>`);
             featureEntries.push({ poly: layer, marker, props });
           }
         });
@@ -495,10 +371,8 @@
             try { const c = turf.centroid(feature).geometry.coordinates; latlng = [c[1], c[0]]; }
             catch (e) { latlng = layer.getBounds().getCenter(); }
 
-            const name = props?.[NAME_FIELD] ?? '—';
             const id = props?.[ID_FIELD] ?? '—';
             const fidValue = props?.[NAME_FIELD] ?? '';
-
             const greenIcon = L.divIcon({
               className: "custom-pin",
               html: `
@@ -512,7 +386,7 @@
             });
             const marker = L.marker(latlng, { icon: greenIcon });
             marker.bindTooltip(`${id}`, { permanent: false, direction: 'auto', className: 'name-id-tooltip', offset: [0, 0] });
-            marker.bindPopup(`<div>${buildHoverHTML(props)}</div>`);
+            marker.bindPopup(`<div>${hoverHtml}</div>`);
             featureEntries.push({ poly: layer, marker, props });
           }
         });
@@ -524,15 +398,19 @@
 
         // Fit bounds op beide lagen
         const allBounds = gjOverig.getBounds().extend(gjWijkaanpak.getBounds());
-        map.fitBounds(allBounds, { padding: [20, 20] });
+        map.fitBounds(allBounds, { padding: [40, 40] });
+
+        // =============== Max/min zoom & boundary box (punt 4 & 5) ===============
+        // MinZoom = huidige zoom (alles in beeld); MaxBounds = padded area
+        map.setMinZoom(map.getZoom());
+        const paddedBounds = allBounds.pad(0.2); // 20% marge
+        map.setMaxBounds(paddedBounds);
+        map.on('drag', () => map.panInsideBounds(paddedBounds, { animate: true }));
 
         // Selecties initialiseren op "alles"
         selected.Projecttype = new Set(unique.Projecttype);
         selected.Projectleider = new Set(unique.Projectleider);
         selected.Projectstatus = new Set(unique.Projectstatus);
-
-        // Legenda
-        buildLegendControl();
 
         // Pins op de kaart + filters en labels direct syncen
         featureEntries.forEach(({ marker }) => centroidPins.addLayer(marker));
@@ -540,14 +418,53 @@
         updateMarkerLabels();
         map.on('zoomend', updateMarkerLabels);
 
-        // Basemap/overlays switch
-        L.control.layers(
+        // =============== Controls (punt 1,2,3) ===============
+        // Basemap/overlays switch (collapsed + hover open/close)
+        const layersCtrl = L.control.layers(
           { 'OpenStreetMap': osm, 'Satelliet (Esri)': esriSat },
           { 'Vlakken': polygonLayer, 'Naam/ID pins': centroidPins },
-          { collapsed: false }
+          { collapsed: true, position: 'topright' }
         ).addTo(map);
+        const lcEl = layersCtrl._container;
+        lcEl.addEventListener('mouseenter', () => layersCtrl._expand());
+        lcEl.addEventListener('mouseleave', () => layersCtrl._collapse());
 
-        // Debug (optioneel): aantallen controleren
+        // Losse symbolen-legenda
+        const legendCtrl = L.control({ position: 'topright' });
+        legendCtrl.onAdd = function () {
+          const div = L.DomUtil.create('div', 'legend');
+          L.DomEvent.disableClickPropagation(div);
+          L.DomEvent.disableScrollPropagation(div);
+          div.innerHTML = `
+            <details class="panel" open>
+              <summary>Legenda</summary>
+              <div class="panel-body">
+                <div class="row">
+                  <svg width="22" height="32" viewBox="0 0 20 30" style="vertical-align:middle;">
+                    <path fill="#86bc25" stroke="#333" stroke-width="1"
+                      d="M10 0C4.5 0 0 4.5 0 10c0 7.5 10 20 10 20s10-12.5 10-20C20 4.5 15.5 0 10 0z"/>
+                    <circle cx="10" cy="10" r="7" fill="white"/>
+                  </svg>
+                  <span>GNWC-project</span>
+                </div>
+                <div class="row" style="align-items:center; margin-top:6px;">
+                  <svg width="30" height="10">
+                    <line x1="0" y1="5" x2="30" y2="5"
+                      stroke="#436026" stroke-width="4" stroke-dasharray="8 6"/>
+                  </svg>
+                  <span>Wijkaanpakgebied</span>
+                </div>
+              </div>
+            </details>
+          `;
+          return div;
+        };
+        legendCtrl.addTo(map);
+
+        // Filterlegenda (Projecttype / Projectleider / Projectstatus), met gelijke breedte/opmaak
+        buildLegendControl();
+
+        // Debug (optioneel)
         // console.log('Wijkaanpak features:', gjWijkaanpak.getLayers().length);
         // console.log('Overig features:', gjOverig.getLayers().length);
       })
@@ -555,7 +472,82 @@
         console.error('Failed to load GeoJSON', err);
         alert('Failed to load GeoJSON. Controleer GEOJSON_URL en de console.');
       });
+
+    // =============== Filterlegenda (behoudt alle 3 filters) ===============
+    function buildLegendControl() {
+      const legend = L.control({ position: 'topright' });
+      legend.onAdd = function () {
+        const div = L.DomUtil.create('div', 'legend');
+        L.DomEvent.disableClickPropagation(div);
+        L.DomEvent.disableScrollPropagation(div);
+
+        // Panel container
+        const details = document.createElement('details');
+        details.className = 'panel';
+        details.setAttribute('open', ''); // desktop open; mobiel zie media query (optioneel kun je JS gebruiken)
+
+        const summary = document.createElement('summary');
+        summary.textContent = 'Filters';
+        details.appendChild(summary);
+
+        const body = document.createElement('div');
+        body.className = 'panel-body';
+
+        function onCheckboxChange(e) {
+          const field = e.target.dataset.field;
+          const val = e.target.dataset.value;
+          if (e.target.checked) selected[field].add(val);
+          else selected[field].delete(val);
+          updateVisibility();
+          updateMarkerLabels();
+        }
+
+        function makeSection(fieldLabel, fieldKey) {
+          const wrapper = document.createElement('div'); wrapper.className = 'group';
+          const title = document.createElement('h4'); title.textContent = fieldLabel; wrapper.appendChild(title);
+
+          const controls = document.createElement('div'); controls.className = 'controls';
+          const btnAll = document.createElement('button'); btnAll.type = 'button'; btnAll.textContent = 'Alles';
+          const btnNone = document.createElement('button'); btnNone.type = 'button'; btnNone.textContent = 'Geen';
+          controls.appendChild(btnAll); controls.appendChild(btnNone); wrapper.appendChild(controls);
+
+          const values = Array.from(unique[fieldKey]).filter(v => v !== undefined && v !== null);
+          values.sort((a, b) => String(a).localeCompare(String(b), 'nl', { numeric: true }));
+
+          values.forEach(v => {
+            const row = document.createElement('label'); row.className = 'row';
+            const cb = document.createElement('input'); cb.type = 'checkbox';
+            cb.checked = selected[fieldKey].has(v);
+            cb.dataset.field = fieldKey; cb.dataset.value = v;
+            cb.addEventListener('change', onCheckboxChange);
+            const span = document.createElement('span'); span.textContent = v;
+            row.appendChild(cb); row.appendChild(span); wrapper.appendChild(row);
+          });
+
+          btnAll.onclick = () => {
+            values.forEach(v => selected[fieldKey].add(v));
+            wrapper.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+            updateVisibility(); updateMarkerLabels();
+          };
+          btnNone.onclick = () => {
+            selected[fieldKey].clear();
+            wrapper.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            updateVisibility(); updateMarkerLabels();
+          };
+
+          return wrapper;
+        }
+
+        body.appendChild(makeSection('Projecttype', 'Projecttype'));
+        body.appendChild(makeSection('Projectleider', 'Projectleider'));
+        body.appendChild(makeSection('Projectstatus', 'Projectstatus'));
+
+        details.appendChild(body);
+        div.appendChild(details);
+        return div;
+      };
+      legend.addTo(map);
+    }
   </script>
 </body>
-
 </html>
